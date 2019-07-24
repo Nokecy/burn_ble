@@ -22,10 +22,10 @@ class BleLogs extends StatelessWidget {
               log.time + " > ",
               style: new TextStyle(color: Colors.black26),
             ),
-            new Container(
-              width: 20,
-            ),
-            new Text(log.msg)
+            new Text(
+              log.msg,
+              softWrap: true,
+            )
           ],
         );
       }).toList(),

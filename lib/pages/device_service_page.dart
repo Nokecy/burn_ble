@@ -52,6 +52,44 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
     });
   }
 
+  Future readData(Guid serviceUUID, Guid characteristicUUID) async {
+    var service = _services.firstWhere((service) {
+      return service.uuid == serviceUUID;
+    });
+    var characteristic = service.characteristics.firstWhere((chara) {
+      return chara.uuid == characteristicUUID;
+    });
+
+    List<int> value = await characteristic.read();
+    setState(() {
+      _logs.add(new LogItem(
+          msg: characteristic.uuid.toString() + ": 读取数据 " + value.toString(),
+          time: DateTime.now().toString()));
+    });
+  }
+
+  void wirteData(Guid serviceUUID, Guid characteristicUUID) {}
+  Future notifyData(Guid serviceUUID, Guid characteristicUUID) async {
+    var service = _services.firstWhere((service) {
+      return service.uuid == serviceUUID;
+    });
+    var characteristic = service.characteristics.firstWhere((chara) {
+      return chara.uuid == characteristicUUID;
+    });
+    var falg = await characteristic.setNotifyValue(!characteristic.isNotifying);
+
+    if (falg) {
+      //TODO: 监听
+    }
+    setState(() {
+      _logs.add(new LogItem(
+          msg: characteristic.uuid.toString() +
+              ": 监听" +
+              (characteristic.isNotifying ? "关闭" : "开启"),
+          time: DateTime.now().toString()));
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -139,6 +177,9 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
               new SingleChildScrollView(
                   child: new BleDeviceServiceList(
                 services: this._services,
+                onWritePressed: this.wirteData,
+                onReadPressed: this.readData,
+                onNotifyPressed: this.notifyData,
               )),
               new SingleChildScrollView(
                   child: new BleLogs(

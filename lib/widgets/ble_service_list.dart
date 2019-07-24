@@ -13,14 +13,24 @@ class ExpansionPanelIndex {
 }
 
 class BleDeviceServiceList extends StatefulWidget {
-  const BleDeviceServiceList({Key key, this.services, this.onPressed})
+  const BleDeviceServiceList(
+      {Key key,
+      this.services,
+      this.onWritePressed,
+      this.onReadPressed,
+      this.onNotifyPressed})
       : super(key: key);
 
   @required
   final List<BluetoothService> services;
 
   @required
-  final void Function(BluetoothService) onPressed;
+  final void Function(Guid serviceUUID, Guid characteristicUUID) onWritePressed;
+  @required
+  final void Function(Guid serviceUUID, Guid characteristicUUID) onReadPressed;
+  @required
+  final void Function(Guid serviceUUID, Guid characteristicUUID)
+      onNotifyPressed;
 
   @override
   _ContainerPageState createState() => _ContainerPageState();
@@ -60,6 +70,7 @@ class _ContainerPageState extends State<BleDeviceServiceList> {
             animationDuration: kThemeAnimationDuration,
             children: widget.services
                 .map<ExpansionPanel>((service) => new ExpansionPanel(
+                    canTapOnHeader: true,
                     isExpanded: _expansion.where((ex) {
                           return ex == service.uuid.toString();
                         }).length >
@@ -75,7 +86,12 @@ class _ContainerPageState extends State<BleDeviceServiceList> {
                             children: ListTile.divideTiles(
                                     tiles: service.characteristics
                                         .map((d) => new BleServiceItem(
-                                            characteristic: d))
+                                            characteristic: d,
+                                            onWritePressed:
+                                                widget.onWritePressed,
+                                            onReadPressed: widget.onReadPressed,
+                                            onNotifyPressed:
+                                                widget.onNotifyPressed))
                                         .toList(),
                                     context: context,
                                     color: Colors.black45)
