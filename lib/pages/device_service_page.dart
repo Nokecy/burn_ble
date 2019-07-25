@@ -255,6 +255,11 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
                     new SingleChildScrollView(
                         child: new BleLogs(
                       logs: _logs,
+                      onClearPressed: () => {
+                        setState(() {
+                          _logs.clear();
+                        })
+                      },
                     )),
                   ],
                 ),
