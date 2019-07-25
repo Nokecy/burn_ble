@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import '../util/index.dart';
 import '../widgets/ble_service_list.dart';
 import '../widgets/ble_log.dart';
+import '../widgets/ble_send_data_input.dart';
 import 'package:oktoast/oktoast.dart';
 
 class DeviceServicePage extends StatefulWidget {
@@ -23,6 +25,8 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
       _nofityCharacteristics; //当前选中的写入特征
   StreamSubscription<BluetoothDeviceState> _stateStreamSubscription;
   StreamSubscription<List<BluetoothService>> _serviceStreamSubscription;
+
+  String _currentValue;
 
   void onStateData(BluetoothDeviceState state) {
     if (state == BluetoothDeviceState.connected) {
@@ -122,6 +126,27 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
     }
   }
 
+  void onInpuValueChanged(String value) {
+    setState(() {
+      _currentValue = value;
+    });
+  }
+
+  void sendValue() {
+    if (_currentValue.length % 2 != 0) {
+      showToast("输入格式错误!");
+      return;
+    }
+    var values = stringToHex(_currentValue);
+    _wirteCharacteristic.write(values);
+    setState(() {
+      _logs.add(new LogItem(
+          msg:
+              _wirteCharacteristic.uuid.toString() + ": 写入" + values.toString(),
+          time: DateTime.now().toString().substring(0, 19)));
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -129,6 +154,7 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
     _serviceStreamSubscription =
         widget.device.services.listen(this.onServiceData);
     _nofityCharacteristics = new Map();
+    _currentValue = "";
   }
 
   @override
@@ -206,26 +232,38 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
               )
             ],
           ),
-          body: new TabBarView(
+          body: Column(
             children: <Widget>[
-              new SingleChildScrollView(
-                  child: new BleDeviceServiceList(
-                services: this._services,
-                wirteCharacteristicUUID: _wirteCharacteristic != null
-                    ? this._wirteCharacteristic.uuid
-                    : null,
-                nofityCharacteristicUUIDs:
-                    this._nofityCharacteristics.keys.map((f) {
-                  return f.uuid;
-                }).toList(),
-                onWritePressed: this.wirteData,
-                onReadPressed: this.readData,
-                onNotifyPressed: this.notifyData,
-              )),
-              new SingleChildScrollView(
-                  child: new BleLogs(
-                logs: _logs,
-              )),
+              Expanded(
+                flex: 1,
+                child: new TabBarView(
+                  children: <Widget>[
+                    new SingleChildScrollView(
+                        child: new BleDeviceServiceList(
+                      services: this._services,
+                      wirteCharacteristicUUID: _wirteCharacteristic != null
+                          ? this._wirteCharacteristic.uuid
+                          : null,
+                      nofityCharacteristicUUIDs:
+                          this._nofityCharacteristics.keys.map((f) {
+                        return f.uuid;
+                      }).toList(),
+                      onWritePressed: this.wirteData,
+                      onReadPressed: this.readData,
+                      onNotifyPressed: this.notifyData,
+                    )),
+                    new SingleChildScrollView(
+                        child: new BleLogs(
+                      logs: _logs,
+                    )),
+                  ],
+                ),
+              ),
+              SendDataInput(
+                enable: _wirteCharacteristic != null,
+                onChanged: this.onInpuValueChanged,
+                onPressed: this.sendValue,
+              )
             ],
           ),
         ));
