@@ -15,16 +15,21 @@ class BleLogs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Column(
-      children: logs.map((log) {
+      children: logs.asMap().keys.map((i) {
+        var log = logs[i];
         return new Row(
           children: <Widget>[
             new Text(
               log.time + " > ",
               style: new TextStyle(color: Colors.black26),
             ),
-            new Text(
-              log.msg,
-              softWrap: true,
+            Expanded(
+              child: Text(
+                log.msg,
+                softWrap: true,
+                style: TextStyle(
+                    color: i % 2 != 0 ? Colors.black : Colors.red[300]),
+              ),
             )
           ],
         );

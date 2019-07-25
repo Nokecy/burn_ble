@@ -16,6 +16,8 @@ class BleDeviceServiceList extends StatefulWidget {
   const BleDeviceServiceList(
       {Key key,
       this.services,
+      this.wirteCharacteristicUUID,
+      this.nofityCharacteristicUUIDs,
       this.onWritePressed,
       this.onReadPressed,
       this.onNotifyPressed})
@@ -23,6 +25,8 @@ class BleDeviceServiceList extends StatefulWidget {
 
   @required
   final List<BluetoothService> services;
+  final Guid wirteCharacteristicUUID;
+  final List<Guid> nofityCharacteristicUUIDs;
 
   @required
   final void Function(Guid serviceUUID, Guid characteristicUUID) onWritePressed;
@@ -87,6 +91,10 @@ class _ContainerPageState extends State<BleDeviceServiceList> {
                                     tiles: service.characteristics
                                         .map((d) => new BleServiceItem(
                                             characteristic: d,
+                                            wirteCharacteristicUUID:
+                                                widget.wirteCharacteristicUUID,
+                                            nofityCharacteristicUUIDs: widget
+                                                .nofityCharacteristicUUIDs,
                                             onWritePressed:
                                                 widget.onWritePressed,
                                             onReadPressed: widget.onReadPressed,

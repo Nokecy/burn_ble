@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-import 'package:oktoast/oktoast.dart';
+import '../widgets/hide_IconButton.dart';
 
 class BleServiceItem extends StatelessWidget {
   const BleServiceItem(
       {Key key,
+      this.wirteCharacteristicUUID,
+      this.nofityCharacteristicUUIDs,
       this.characteristic,
       this.onWritePressed,
       this.onReadPressed,
@@ -13,6 +15,8 @@ class BleServiceItem extends StatelessWidget {
 
   @required
   final BluetoothCharacteristic characteristic;
+  final Guid wirteCharacteristicUUID;
+  final List<Guid> nofityCharacteristicUUIDs;
 
   @required
   final void Function(Guid serviceUUID, Guid characteristicUUID) onWritePressed;
@@ -76,15 +80,19 @@ class BleServiceItem extends StatelessWidget {
       ),
       trailing: Container(
         height: 48,
-        width: 120,
+        width: 80,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             new Row(
               children: <Widget>[
                 Expanded(
-                  child: IconButton(
-                    icon: Icon(Icons.file_upload, color: Colors.black38),
+                  child: VisibleIconButton(
+                    visible: characteristic.properties.write,
+                    icon: Icon(Icons.file_upload,
+                        color: wirteCharacteristicUUID == characteristic.uuid
+                            ? Colors.blue
+                            : Colors.black38),
                     onPressed: () {
                       onWritePressed(this.characteristic.serviceUuid,
                           this.characteristic.uuid);
@@ -93,7 +101,8 @@ class BleServiceItem extends StatelessWidget {
                   flex: 1,
                 ),
                 Expanded(
-                    child: IconButton(
+                    child: VisibleIconButton(
+                      visible: characteristic.properties.read,
                       icon: Icon(Icons.file_download, color: Colors.black38),
                       onPressed: () {
                         onReadPressed(this.characteristic.serviceUuid,
@@ -102,9 +111,14 @@ class BleServiceItem extends StatelessWidget {
                     ),
                     flex: 1),
                 Expanded(
-                    child: IconButton(
-                      icon:
-                          Icon(Icons.notifications_none, color: Colors.black38),
+                    child: VisibleIconButton(
+                      visible: characteristic.properties.notify,
+                      icon: Icon(Icons.notifications_none,
+                          color: nofityCharacteristicUUIDs
+                                      .indexOf(characteristic.uuid) >=
+                                  0
+                              ? Colors.blue
+                              : Colors.black38),
                       onPressed: () {
                         onNotifyPressed(this.characteristic.serviceUuid,
                             this.characteristic.uuid);

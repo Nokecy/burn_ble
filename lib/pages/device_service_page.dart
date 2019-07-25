@@ -16,9 +16,11 @@ class DeviceServicePage extends StatefulWidget {
 }
 
 class _DeviceServicePageState extends State<DeviceServicePage> {
-  List<BluetoothService> _services = [];
-  List<LogItem> _logs = [];
-
+  List<BluetoothService> _services = []; //当前设备服务列表
+  List<LogItem> _logs = []; //实时日志
+  BluetoothCharacteristic _wirteCharacteristic; //当前选中的写入特征
+  Map<BluetoothCharacteristic, StreamSubscription<List<int>>>
+      _nofityCharacteristics; //当前选中的写入特征
   StreamSubscription<BluetoothDeviceState> _stateStreamSubscription;
   StreamSubscription<List<BluetoothService>> _serviceStreamSubscription;
 
@@ -27,7 +29,8 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
       try {
         setState(() {
           _logs.add(new LogItem(
-              msg: "连接成功,正在发现服务...", time: DateTime.now().toString()));
+              msg: "连接成功,正在发现服务...",
+              time: DateTime.now().toString().substring(0, 19)));
         });
         widget.device.discoverServices();
       } catch (e) {}
@@ -36,7 +39,8 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
     if (state == BluetoothDeviceState.disconnected) {
       showToast("连接断开!");
       setState(() {
-        _logs.add(new LogItem(msg: "连接断开...", time: DateTime.now().toString()));
+        _logs.add(new LogItem(
+            msg: "连接断开...", time: DateTime.now().toString().substring(0, 19)));
       });
     }
   }
@@ -47,7 +51,7 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
       if (services.length > 0) {
         _logs.add(new LogItem(
             msg: "发现" + services.length.toString() + "个服务",
-            time: DateTime.now().toString()));
+            time: DateTime.now().toString().substring(0, 19)));
       }
     });
   }
@@ -63,12 +67,26 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
     List<int> value = await characteristic.read();
     setState(() {
       _logs.add(new LogItem(
-          msg: characteristic.uuid.toString() + ": 读取数据 " + value.toString(),
-          time: DateTime.now().toString()));
+          msg: "特征UUID：" +
+              characteristic.uuid.toString() +
+              ": 读取数据 " +
+              value.toString(),
+          time: DateTime.now().toString().substring(0, 19)));
     });
   }
 
-  void wirteData(Guid serviceUUID, Guid characteristicUUID) {}
+  void wirteData(Guid serviceUUID, Guid characteristicUUID) {
+    var service = _services.firstWhere((service) {
+      return service.uuid == serviceUUID;
+    });
+    var characteristic = service.characteristics.firstWhere((chara) {
+      return chara.uuid == characteristicUUID;
+    });
+    setState(() {
+      _wirteCharacteristic = characteristic;
+    });
+  }
+
   Future notifyData(Guid serviceUUID, Guid characteristicUUID) async {
     var service = _services.firstWhere((service) {
       return service.uuid == serviceUUID;
@@ -79,15 +97,29 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
     var falg = await characteristic.setNotifyValue(!characteristic.isNotifying);
 
     if (falg) {
-      //TODO: 监听
+      var linsten = characteristic.value.listen((value) {
+        setState(() {
+          _logs.add(new LogItem(
+              msg: characteristic.uuid.toString() + ": 收到" + value.toString(),
+              time: DateTime.now().toString().substring(0, 19)));
+        });
+      });
+
+      setState(() {
+        if (_nofityCharacteristics.containsKey(characteristic)) {
+          _nofityCharacteristics[characteristic].cancel();
+
+          _nofityCharacteristics.remove(characteristic);
+        } else {
+          _nofityCharacteristics[characteristic] = linsten;
+        }
+        _logs.add(new LogItem(
+            msg: characteristic.uuid.toString() +
+                ": 监听" +
+                (characteristic.isNotifying ? "开启" : "关闭"),
+            time: DateTime.now().toString().substring(0, 19)));
+      });
     }
-    setState(() {
-      _logs.add(new LogItem(
-          msg: characteristic.uuid.toString() +
-              ": 监听" +
-              (characteristic.isNotifying ? "关闭" : "开启"),
-          time: DateTime.now().toString()));
-    });
   }
 
   @override
@@ -96,6 +128,7 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
     _stateStreamSubscription = widget.device.state.listen(this.onStateData);
     _serviceStreamSubscription =
         widget.device.services.listen(this.onServiceData);
+    _nofityCharacteristics = new Map();
   }
 
   @override
@@ -111,7 +144,8 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
     super.didChangeDependencies();
     widget.device.connect(autoConnect: false, timeout: Duration(seconds: 10));
     setState(() {
-      _logs.add(new LogItem(msg: "正在连接...", time: DateTime.now().toString()));
+      _logs.add(new LogItem(
+          msg: "正在连接...", time: DateTime.now().toString().substring(0, 19)));
     });
   }
 
@@ -177,6 +211,13 @@ class _DeviceServicePageState extends State<DeviceServicePage> {
               new SingleChildScrollView(
                   child: new BleDeviceServiceList(
                 services: this._services,
+                wirteCharacteristicUUID: _wirteCharacteristic != null
+                    ? this._wirteCharacteristic.uuid
+                    : null,
+                nofityCharacteristicUUIDs:
+                    this._nofityCharacteristics.keys.map((f) {
+                  return f.uuid;
+                }).toList(),
                 onWritePressed: this.wirteData,
                 onReadPressed: this.readData,
                 onNotifyPressed: this.notifyData,
