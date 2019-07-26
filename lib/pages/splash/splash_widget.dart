@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../util/screen_utils.dart';
 import '../container_page.dart';
+import '../wifi_page.dart';
 import '../../constant/constant.dart';
 
 ///打开APP首页
@@ -13,16 +14,42 @@ class SplashWidget extends StatefulWidget {
 
 class _SplashWidgetState extends State<SplashWidget> {
   var container = ContainerPage();
+  var wifiPage = WifiPage();
 
   bool showAd = true;
 
   @override
   Widget build(BuildContext context) {
-    print('build splash');
     return Stack(
       children: <Widget>[
         Offstage(
-          child: container,
+          child: Center(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                MaterialButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ContainerPage()));
+                  },
+                  color: Colors.blue,
+                  textColor: Colors.white,
+                  child: Text("蓝牙助手"),
+                ),
+                Container(width: 30,),
+                MaterialButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => WifiPage()));
+                  },
+                  color: Colors.blue,
+                  textColor: Colors.white,
+                  child: Text("WIFI智能配置"),
+                )
+              ],
+            ),
+          ),
           offstage: showAd,
         ),
         Offstage(
@@ -44,7 +71,7 @@ class _SplashWidgetState extends State<SplashWidget> {
                       Padding(
                         padding: const EdgeInsets.only(top: 20.0),
                         child: Text(
-                          '落花有意随流水,流水无心恋落花',
+                          '蓝牙 And Wifi智能配置助手',
                           style: TextStyle(fontSize: 15.0, color: Colors.black),
                         ),
                       )
@@ -74,29 +101,6 @@ class _SplashWidgetState extends State<SplashWidget> {
                             color: Color(0xffEDEDED),
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(10.0))),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 40.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Image.asset(
-                            Constant.ASSETS_IMG + 'ic_launcher.png',
-                            width: 50.0,
-                            height: 50.0,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: Text(
-                              'Hi,豆芽',
-                              style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 30.0,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          )
-                        ],
                       ),
                     )
                   ],
