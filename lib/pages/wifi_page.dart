@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:smartconfig/smartconfig.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class WifiPage extends StatefulWidget {
   WifiPage({Key key}) : super(key: key);
@@ -54,13 +55,47 @@ class _WifiPageState extends State<WifiPage> {
   }
 
   void onPressed() {
+    showDialog(
+      // 传入 context
+      context: context,
+      barrierDismissible: false, // 屏蔽点击对话框外部自动关闭
+      // 构建 Dialog 的视图
+      builder: (_) => WillPopScope(
+        onWillPop: () async {
+          return Future.value(false);
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Container(
+              alignment: Alignment.center,
+              color: Colors.white,
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text('正在执行配网,请稍后',
+                        style: TextStyle(
+                            fontSize: 12, decoration: TextDecoration.none)),
+                  ),
+                  SpinKitWave(
+                      color: Colors.yellow, type: SpinKitWaveType.center),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+
     Smartconfig.start(_wifiName, _wifiBSSID, _passWord).then((onValue) {
+      Navigator.pop(context);
       if (onValue != null) {
-        showToast("配置失败!");
+        showToast("配网成功!" + onValue);
       } else {
-        showToast("配置成功!");
+        showToast("配网失败!");
       }
-      print("sm version $onValue");
     });
   }
 

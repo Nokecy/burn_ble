@@ -31,6 +31,7 @@ dev_dependencies:
   flutter_blue: "0.6.0+1"
   smartconfig : "0.0.1"
   connectivity: "0.4.3+6"
+  flutter_spinkit: "^3.1.0"
   oktoast: "^2.1.7"
 
 
