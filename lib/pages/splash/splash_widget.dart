@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../util/screen_utils.dart';
 import '../container_page.dart';
 import '../wifi_page.dart';
+import '../mqtt_page.dart';
 import '../../constant/constant.dart';
 
 ///打开APP首页
@@ -15,6 +16,7 @@ class SplashWidget extends StatefulWidget {
 class _SplashWidgetState extends State<SplashWidget> {
   var container = ContainerPage();
   var wifiPage = WifiPage();
+  var mqttPage = MqttPage();
 
   bool showAd = true;
 
@@ -37,7 +39,9 @@ class _SplashWidgetState extends State<SplashWidget> {
                   textColor: Colors.white,
                   child: Text("蓝牙助手"),
                 ),
-                Container(width: 30,),
+                Container(
+                  width: 30,
+                ),
                 MaterialButton(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -46,6 +50,18 @@ class _SplashWidgetState extends State<SplashWidget> {
                   color: Colors.blue,
                   textColor: Colors.white,
                   child: Text("WIFI智能配置"),
+                ),
+                Container(
+                  width: 30,
+                ),
+                MaterialButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => MqttPage()));
+                  },
+                  color: Colors.blue,
+                  textColor: Colors.white,
+                  child: Text("MQTT客户端"),
                 )
               ],
             ),

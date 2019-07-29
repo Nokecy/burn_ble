@@ -27,12 +27,14 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
+
+  logging: ^0.11.3+2
   flutter_blue: "0.6.0+1"
-  smartconfig : "0.0.1"
-  connectivity: "0.4.3+6"
-  flutter_spinkit: "^3.1.0"
-  oktoast: "^2.1.7"
+  mqtt_client: "5.5.3" # mqtt 客户端
+  smartconfig : "0.0.1" #wifi智能配网
+  connectivity: "0.4.3+6" #获取WiFi信息
+  flutter_spinkit: "^3.1.0" #加载动画
+  oktoast: "^2.1.7" #toast
 
 
 # For information on the generic Dart part of this file, see the
@@ -47,7 +49,7 @@ flutter:
   uses-material-design: true
   assets:
       - assets/images/
-
+      - config/private.json
   # To add assets to your application, add an assets section, like this:
   # assets:
   #  - images/a_dot_burr.jpeg
